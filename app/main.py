@@ -2,6 +2,7 @@ from fastapi import Depends
 from fastapi import FastAPI
 from fastapi import UploadFile, File
 from fastapi import WebSocket
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import auth_router
@@ -13,6 +14,13 @@ from app.storage import upload_to_minio, download_from_minio
 
 app = FastAPI(title="SecureCloud", version="1.0")
 app.include_router(auth_router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.on_event("startup")
