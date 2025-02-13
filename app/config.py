@@ -22,7 +22,7 @@ DB_NAME = os.getenv("DB_NAME", "nuage_db")
 DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # MinIO
-MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "http://localhost:9000")
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "http://127.0.0.1:9000")
 MINIO_ROOT_USER = os.getenv("MINIO_ROOT_USER", "admin")
 MINIO_ROOT_PASSWORD = os.getenv("MINIO_ROOT_PASSWORD", "password")
 MINIO_BUCKET = os.getenv("MINIO_BUCKET", "nuage-storage")

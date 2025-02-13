@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta, UTC, timezone
+from datetime import datetime, timedelta, timezone
+
 import jwt  # PyJWT
 from fastapi import APIRouter
 from fastapi import Depends, HTTPException
@@ -44,7 +45,7 @@ async def get_user_by_username(db: AsyncSession, username: str):
     return result.scalars().first()
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)) -> User:
     credentials_exception = HTTPException(status_code=401, detail="Invalid Token", headers={"WWW-Authenticate": "Bearer"})
 
     try:

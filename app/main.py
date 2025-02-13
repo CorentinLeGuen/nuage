@@ -1,16 +1,17 @@
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from fastapi import FastAPI
 from fastapi import UploadFile, File
 from fastapi import WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.responses import StreamingResponse
 
 from app.auth import auth_router
 from app.auth import get_current_user
 from app.database import create_tables
 from app.database import get_db
 from app.models import User
-from app.storage import upload_to_minio, download_from_minio
+from app.storage import upload_to_minio, download_from_minio, list_stored_files
 
 app = FastAPI(title="SecureCloud", version="1.0")
 app.include_router(auth_router)
@@ -33,15 +34,45 @@ async def home(user: dict = Depends(get_current_user)):
     return {"message": f"Welcome {user['username']}!"}
 
 
-@app.post("/upload/")
-async def upload(file: UploadFile = File(...)):
-    data = await file.read()
-    return {"message": upload_to_minio(file.filename, data)}
+@app.get("/files")
+async def list_files(user: User = Depends(get_current_user)):
+    try:
+        files = list_stored_files(user.username)
+        return files
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...), user: User = Depends(get_current_user)):
+    file_name = f"{user.username}/{file.filename}"
+    try:
+        upload_to_minio(file_name, file)
+
+        return {"message": "File uploaded successfully", "file_name": file_name}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/download/{file_name}")
-async def download(file_name: str):
-    return {"file": file_name, "content": download_from_minio(file_name)}
+async def download(file_name: str, user: User = Depends(get_current_user)):
+    file_key = f"{user.username}/{file_name}"
+
+    print(f"\t-> {file_key}")
+    response = download_from_minio(file_key)
+    file_stream = response["Body"]
+
+    return StreamingResponse(
+        file_stream,
+        media_type="application/octet-stream",
+        headers={
+            "Content-disposition": "attachment;filename=" + file_name,
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET",
+            "Access-Control-Allow-Headers": "*"
+        }
+    )
 
 
 @app.websocket("/sync")
