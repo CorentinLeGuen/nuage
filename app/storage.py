@@ -35,6 +35,7 @@ def upload_to_minio(file_name, file_data):
     except Exception as e:
         raise e
 
+
 def delete_stored_file(file_key):
     try:
         s3_client.delete_object(Bucket=MINIO_BUCKET, Key=file_key)
@@ -53,7 +54,16 @@ def list_stored_files(user_prefix: str):
         if "Contents" in response:
             for obj in response["Contents"]:
                 file_name = obj["Key"].split("/")[-1]
-                files.append({"file_name": file_name, "size": obj["Size"]})
+                file_size = obj["Size"]
+                file_date = obj["LastModified"]
+
+                files.append(
+                    {
+                        "file_name": file_name,
+                        "size": file_size,
+                        "date": file_date
+                    }
+                )
 
         return files
     except Exception as e:
