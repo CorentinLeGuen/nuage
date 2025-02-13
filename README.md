@@ -6,19 +6,24 @@ Nuage is a **self-hosted** platform for **securely sharing files, videos, and im
 
 ---
 ## 📜 **Installation**
-📦 Start the Containers with Docker:
+🐳 Start the Containers with Docker:
 ```shell
 docker-compose up -d --build  # build Docker images
 ```
 
-Install dependencies:
+📦 Install dependencies:
 ```shell
 pip install -r requirements.txt
 ```
 
 🚀 Run the project:
 ```shell
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+🧪 Run tests:
+```shell
+pytest tests/
 ```
 
 Access the documentation 👉 [127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
