@@ -49,15 +49,22 @@ def delete_stored_file(file_key):
 def list_stored_files(user_prefix: str):
     try:
         response = s3_client.list_objects_v2(Bucket=MINIO_BUCKET, Prefix=user_prefix + "/")
-        files = []
+        files_by_folder = {}
 
         if "Contents" in response:
             for obj in response["Contents"]:
-                file_name = obj["Key"].split("/")[-1]
-                file_size = obj["Size"]
-                file_date = obj["LastModified"]
+                full_path = obj["Key"]
+                parts = full_path.split("/")
 
-                files.append(
+                folder = parts[1] if len(parts) > 2 else ""
+                file_name = parts[-1]
+                file_size = obj["Size"]
+                file_date = obj["LastModified"].strftime("%Y-%m-%d %H:%M:%S")
+
+                if folder not in files_by_folder:
+                    files_by_folder[folder] = []
+
+                files_by_folder[folder].append(
                     {
                         "file_name": file_name,
                         "size": file_size,
@@ -65,10 +72,10 @@ def list_stored_files(user_prefix: str):
                     }
                 )
 
-        return files
+        return files_by_folder
     except Exception as e:
-        print(f"MinIO Error: {str(e)}")
-        return []
+        print(f"MinIO Listing Error: {str(e)}")
+        return {}
 
 
 def download_from_minio(file_key):

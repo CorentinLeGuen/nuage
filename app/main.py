@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Form
 from fastapi import FastAPI
 from fastapi import UploadFile, File
 from fastapi import WebSocket
@@ -44,12 +44,13 @@ async def list_files(user: User = Depends(get_current_user)):
 
 
 @app.post("/upload")
-async def upload_file(file: UploadFile = File(...), user: User = Depends(get_current_user)):
-    file_name = f"{user.username}/{file.filename}"
-    try:
-        upload_to_minio(file_name, file)
+async def upload_file(file: UploadFile = File(...), folder: str = Form(""), user: User = Depends(get_current_user)):
+    file_key = f"{user.username}/{folder}/{file.filename}" if folder else f"{user.username}/{file.filename}"
 
-        return {"message": "File uploaded successfully", "file_name": file_name}
+    try:
+        upload_to_minio(file_key, file)
+
+        return {"message": "File uploaded successfully", "file_name": file.filename, "folder": folder}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
