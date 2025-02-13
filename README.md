@@ -2,7 +2,7 @@
 
 Nuage is a **self-hosted** platform for **securely sharing files, videos, and images**, featuring **authentication and permission management**. 🚀
 
-![Project Status](https://img.shields.io/badge/status-in%20development-orange?style=for-the-badge)
+[![Project Status](https://img.shields.io/badge/status-in%20development-orange?style=for-the-badge)](https://github.com/CorentinLeGuen/nuage/tags)
 
 ---
 ## 📜 **Installation**
