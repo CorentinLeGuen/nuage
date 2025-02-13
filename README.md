@@ -39,6 +39,14 @@ Access the documentation 👉 [127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ---
 ## 🎯 **To-Do**
-✅ Add a frontend using Nuxt 3 or Vue.js  
+✅ Add a frontend using [Svelte](https://svelte.dev/).  
 ✅ Manage user roles & permissions  
 ✅ Upload & stream files directly in the browser  
+
+---
+## 📬 Contact
+
+Have questions or suggestions about **Nuage**? Feel free to reach out! 😊
+
+📧 **Email**: [cleguen.refined872@passmail.net](mailto:cleguen.refined872@passmail.net)  
+
