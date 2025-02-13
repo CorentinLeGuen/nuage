@@ -11,7 +11,7 @@ from app.auth import get_current_user
 from app.database import create_tables
 from app.database import get_db
 from app.models import User
-from app.storage import upload_to_minio, download_from_minio, list_stored_files
+from app.storage import upload_to_minio, download_from_minio, list_stored_files, delete_stored_file
 
 app = FastAPI(title="SecureCloud", version="1.0")
 app.include_router(auth_router)
@@ -52,6 +52,17 @@ async def upload_file(file: UploadFile = File(...), user: User = Depends(get_cur
         return {"message": "File uploaded successfully", "file_name": file_name}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/delete/{file_name}")
+async def delete_file(file_name: str, user: User = Depends(get_current_user)):
+    file_key = f"{user.username}/{file_name}"
+
+    try:
+        delete_stored_file(file_key)
+        return {"message": f"File {file_name} deleted successfully"}
+    except Exception as e:
+        return {"error": "Delete failed"}, 500
+
 
 
 @app.get("/download/{file_name}")

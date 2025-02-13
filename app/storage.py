@@ -35,6 +35,15 @@ def upload_to_minio(file_name, file_data):
     except Exception as e:
         raise e
 
+def delete_stored_file(file_key):
+    try:
+        s3_client.delete_object(Bucket=MINIO_BUCKET, Key=file_key)
+        return f"File {file_key} deleted."
+    except NoCredentialsError:
+        return "Error: MinIO access refused."
+    except Exception as e:
+        raise e
+
 
 def list_stored_files(user_prefix: str):
     try:
