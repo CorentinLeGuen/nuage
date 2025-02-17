@@ -11,7 +11,7 @@ from app.auth import get_current_user
 from app.database import create_tables
 from app.database import get_db
 from app.models import User
-from app.storage import upload_to_minio, download_from_minio, list_stored_files, delete_stored_file
+from app.storage import upload_to_minio, download_from_minio, list_stored_files, delete_stored_file, create_stored_folder
 
 app = FastAPI(title="SecureCloud", version="1.0")
 app.include_router(auth_router)
@@ -54,23 +54,36 @@ async def upload_file(file: UploadFile = File(...), folder: str = Form(""), user
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/delete/{file_name}")
-async def delete_file(file_name: str, user: User = Depends(get_current_user)):
-    file_key = f"{user.username}/{file_name}"
+
+@app.post("/create-folder")
+async def create_folder(folder: str = Form(...), user: User = Depends(get_current_user)):
+    if not folder or "/" in folder:
+        return {"error": "Folder name not valid."}, 400
+
+    folder_key = f"{user.username}/{folder}/"
+
+    try:
+        create_stored_folder(folder_key)
+        return {"message": f"Dossier '{folder}' créé avec succès"}
+    except Exception as e:
+        return {"error": "Échec de la création du dossier"}, 500
+
+
+@app.delete("/delete/{file_path:path}")
+async def delete_file(file_path: str, user: User = Depends(get_current_user)):
+    file_key = f"{user.username}/{file_path}"
 
     try:
         delete_stored_file(file_key)
-        return {"message": f"File {file_name} deleted successfully"}
+        return {"message": f"File {file_path} deleted successfully"}
     except Exception as e:
         return {"error": "Delete failed"}, 500
-
 
 
 @app.get("/download/{file_name}")
 async def download(file_name: str, user: User = Depends(get_current_user)):
     file_key = f"{user.username}/{file_name}"
 
-    print(f"\t-> {file_key}")
     response = download_from_minio(file_key)
     file_stream = response["Body"]
 

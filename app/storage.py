@@ -46,6 +46,16 @@ def delete_stored_file(file_key):
         raise e
 
 
+def create_stored_folder(folder_key):
+    try:
+        s3_client.put_object(Bucket=MINIO_BUCKET, Key=folder_key, Body=b"")
+        return f"File {folder_key} deleted."
+    except NoCredentialsError:
+        return "Error: MinIO access refused."
+    except Exception as e:
+        raise e
+
+
 def list_stored_files(user_prefix: str):
     try:
         response = s3_client.list_objects_v2(Bucket=MINIO_BUCKET, Prefix=user_prefix + "/")
@@ -61,6 +71,8 @@ def list_stored_files(user_prefix: str):
                 file_size = obj["Size"]
                 file_date = obj["LastModified"].strftime("%Y-%m-%d %H:%M:%S")
 
+                is_folder = file_size == 0 and full_path.endswith("/")
+
                 if folder not in files_by_folder:
                     files_by_folder[folder] = []
 
@@ -68,7 +80,8 @@ def list_stored_files(user_prefix: str):
                     {
                         "file_name": file_name,
                         "size": file_size,
-                        "date": file_date
+                        "date": file_date,
+                        "is_folder": is_folder
                     }
                 )
 
